@@ -160,7 +160,8 @@ window.addEventListener("scroll", function () {
 //     };
 
 //     try {
-//       const response = await fetch("https://website-backend-oc1g.onrender.com/api/form/submit", {
+//       const response = await fetch("http://localhost:5000/api/form/submit", {
+//       // const response = await fetch("https://website-backend-oc1g.onrender.com/api/form/submit", {
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
 //         body: JSON.stringify(formData),
@@ -192,58 +193,86 @@ window.addEventListener("scroll", function () {
 //       document.querySelector(".sent-message").style.display = "none";
 //     }
 //   });
+ 
 
 
-document
-  .getElementById("contactForm")
-  .addEventListener("submit", async function (e) {
-    e.preventDefault(); // Form direct submit hone se rokna
 
-    const submitButton = document.querySelector('button[type="submit"]');
-    submitButton.disabled = true; // Button disable karna
-    submitButton.textContent = "Sending..."; // Text change karna
+document.getElementById("contactForm").addEventListener("submit", async function (e) {
+  e.preventDefault(); // Prevent default form submission
 
-    const formData = {
-      name: document.querySelector('input[name="name"]').value,
-      email: document.querySelector('input[name="email"]').value,
-      number: document.querySelector('input[name="number"]').value,
-      qualification: document.querySelector('input[name="qualification"]').value,
-      subject: document.querySelector('input[name="subject"]').value,
-      message: document.querySelector('textarea[name="message"]').value,
-    };
+  const submitButton = document.getElementById("submitBtn");
+  submitButton.disabled = true; // Disable button
+  submitButton.textContent = "Sending..."; // Show loading state
 
-    try {
-      const response = await fetch("https://website-backend-oc1g.onrender.com/api/form/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+  const formData = {
+    name: document.querySelector('input[name="name"]').value.trim(),
+    email: document.querySelector('input[name="email"]').value.trim(),
+    number: document.querySelector('input[name="number"]').value.trim(),
+    qualification: document.querySelector('input[name="qualification"]').value.trim(),
+    subject: document.querySelector('input[name="subject"]').value.trim(),
+    message: document.querySelector('textarea[name="message"]').value.trim(),
+  };
+
+  // **Email validation**
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailPattern.test(formData.email)) {
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid Email",
+      text: "Please enter a valid email address.",
+    });
+    resetButton(submitButton);
+    return;
+  }
+
+  // **Mobile number validation**
+  if (!/^\d{10}$/.test(formData.number)) {
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid Mobile Number",
+      text: "Please enter a valid 10-digit mobile number.",
+    });
+    resetButton(submitButton);
+    return;
+  }
+
+  try {
+    const response = await fetch("https://website-backend-oc1g.onrender.com/api/form/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      Swal.fire({
+        icon: "success",
+        title: "Message Sent!",
+        text: "Your message has been sent successfully.",
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        Swal.fire({
-          icon: "success",
-          title: "Message Sent!",
-          text: "Your message has been sent successfully.",
-        });
-
-        document.getElementById("contactForm").reset();
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: result.error || "Something went wrong. Try again.",
-        });
-      }
-    } catch (error) {
+      document.getElementById("contactForm").reset();
+    } else {
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "Something went wrong. Try again.",
+        text: result.error || "Something went wrong. Try again.",
       });
-    } finally {
-      submitButton.disabled = false; // Button wapas enable karna
-      submitButton.textContent = "Send Message"; // Button ka text reset karna
     }
-  });
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Something went wrong. Try again.",
+    });
+  } finally {
+    resetButton(submitButton);
+  }
+});
+
+// Function to reset button state
+function resetButton(button) {
+  button.disabled = false;
+  button.textContent = "Send Message";
+}
