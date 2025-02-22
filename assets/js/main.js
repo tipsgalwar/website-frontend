@@ -197,7 +197,11 @@ window.addEventListener("scroll", function () {
 document
   .getElementById("contactForm")
   .addEventListener("submit", async function (e) {
-    e.preventDefault(); // Form ko direct submit hone se rokna hai
+    e.preventDefault(); // Form direct submit hone se rokna
+
+    const submitButton = document.querySelector('button[type="submit"]');
+    submitButton.disabled = true; // Button disable karna
+    submitButton.textContent = "Sending..."; // Text change karna
 
     const formData = {
       name: document.querySelector('input[name="name"]').value,
@@ -218,17 +222,14 @@ document
       const result = await response.json();
 
       if (response.ok) {
-        // SweetAlert2 Success Message
         Swal.fire({
           icon: "success",
           title: "Message Sent!",
           text: "Your message has been sent successfully.",
         });
 
-        // Form ko reset karke khali kar dein
         document.getElementById("contactForm").reset();
       } else {
-        // SweetAlert2 Error Message
         Swal.fire({
           icon: "error",
           title: "Oops...",
@@ -236,11 +237,13 @@ document
         });
       }
     } catch (error) {
-      // SweetAlert2 Error Message for Catch Block
       Swal.fire({
         icon: "error",
         title: "Oops...",
         text: "Something went wrong. Try again.",
       });
+    } finally {
+      submitButton.disabled = false; // Button wapas enable karna
+      submitButton.textContent = "Send Message"; // Button ka text reset karna
     }
   });
