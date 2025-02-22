@@ -144,6 +144,56 @@ window.addEventListener("scroll", function () {
   }
 });
 
+// document
+//   .getElementById("contactForm")
+//   .addEventListener("submit", async function (e) {
+//     e.preventDefault(); // Form ko direct submit hone se rokna hai
+
+//     const formData = {
+//       name: document.querySelector('input[name="name"]').value,
+//       email: document.querySelector('input[name="email"]').value,
+//       number: document.querySelector('input[name="number"]').value,
+//       qualification: document.querySelector('input[name="qualification"]')
+//         .value,
+//       subject: document.querySelector('input[name="subject"]').value,
+//       message: document.querySelector('textarea[name="message"]').value,
+//     };
+
+//     try {
+//       const response = await fetch("https://website-backend-oc1g.onrender.com/api/form/submit", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(formData),
+//       });
+
+//       const result = await response.json();
+
+//       if (response.ok) {
+//         // Form submit hone par success message dikhayein
+//         document.querySelector(".sent-message").style.display = "block";
+//         document.querySelector(".error-message").style.display = "none";
+
+//         // Form ko reset karke khali kar dein
+//         document.getElementById("contactForm").reset();
+
+//         // Success message ko 5 seconds baad hide kar dena
+//         setTimeout(() => {
+//           document.querySelector(".sent-message").style.display = "none";
+//         }, 5000);
+//       } else {
+//         document.querySelector(".error-message").innerText = result.error;
+//         document.querySelector(".error-message").style.display = "block";
+//         document.querySelector(".sent-message").style.display = "none";
+//       }
+//     } catch (error) {
+//       document.querySelector(".error-message").innerText =
+//         "Something went wrong. Try again.";
+//       document.querySelector(".error-message").style.display = "block";
+//       document.querySelector(".sent-message").style.display = "none";
+//     }
+//   });
+
+
 document
   .getElementById("contactForm")
   .addEventListener("submit", async function (e) {
@@ -153,8 +203,7 @@ document
       name: document.querySelector('input[name="name"]').value,
       email: document.querySelector('input[name="email"]').value,
       number: document.querySelector('input[name="number"]').value,
-      qualification: document.querySelector('input[name="qualification"]')
-        .value,
+      qualification: document.querySelector('input[name="qualification"]').value,
       subject: document.querySelector('input[name="subject"]').value,
       message: document.querySelector('textarea[name="message"]').value,
     };
@@ -169,26 +218,29 @@ document
       const result = await response.json();
 
       if (response.ok) {
-        // Form submit hone par success message dikhayein
-        document.querySelector(".sent-message").style.display = "block";
-        document.querySelector(".error-message").style.display = "none";
+        // SweetAlert2 Success Message
+        Swal.fire({
+          icon: "success",
+          title: "Message Sent!",
+          text: "Your message has been sent successfully.",
+        });
 
         // Form ko reset karke khali kar dein
         document.getElementById("contactForm").reset();
-
-        // Success message ko 5 seconds baad hide kar dena
-        setTimeout(() => {
-          document.querySelector(".sent-message").style.display = "none";
-        }, 5000);
       } else {
-        document.querySelector(".error-message").innerText = result.error;
-        document.querySelector(".error-message").style.display = "block";
-        document.querySelector(".sent-message").style.display = "none";
+        // SweetAlert2 Error Message
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: result.error || "Something went wrong. Try again.",
+        });
       }
     } catch (error) {
-      document.querySelector(".error-message").innerText =
-        "Something went wrong. Try again.";
-      document.querySelector(".error-message").style.display = "block";
-      document.querySelector(".sent-message").style.display = "none";
+      // SweetAlert2 Error Message for Catch Block
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong. Try again.",
+      });
     }
   });
