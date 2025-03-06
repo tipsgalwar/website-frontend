@@ -664,8 +664,11 @@ h6 {
 
 .footer .footer-contact p {
   margin-bottom: 5px;
+  /* color: white; */
 }
-
+.footer .footer-contact a{
+  color: white;
+}
 .footer .footer-newsletter .newsletter-form {
   margin-top: 30px;
   margin-bottom: 15px;
