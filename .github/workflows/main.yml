@@ -1,27 +1,36 @@
-name: Deploy Website Frontend to EC2
+name: Deploy to EC2
 
 on:
   push:
-    branches: [ main ] 
+    branches: [ main ]  # main branch पर push होने पर deploy करेगा
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # 1. Code Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Add SSH Key
+      # 2. SSH Key Setup (EC2 से कनेक्ट करने के लिए)
+      - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}  
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}  
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          known_hosts: "dummy"  # (Security के लिए)
 
+      # 3. Deploy Files to EC2
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.EC2_IP }} "rm -rf /var/www/tipsgalwarFrontend/*"
-          
-          scp -r -o StrictHostKeyChecking=no ./ root@${{ secrets.EC2_IP }}:/var/www/tipsgalwarFrontend/
-          
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.EC2_IP }} "systemctl restart nginx"
+          # पुरानी फाइल्स डिलीट करें (Optional)
+          ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "rm -rf /var/www/tipsgalwar/*"
+
+          # नई फाइल्स कॉपी करें
+          scp -o StrictHostKeyChecking=no -r -i $HOME/.ssh/id_rsa ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/var/www/tipsgalwar/
+
+          # Permissions ठीक करें
+          ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "sudo chown -R ubuntu:ubuntu /var/www/tipsgalwar && sudo chmod -R 755 /var/www/tipsgalwar"
+
+          # Nginx Restart (अगर जरूरत हो)
+          ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "sudo systemctl restart nginx"
